@@ -1,0 +1,5 @@
+GITHUB_TOKEN=your_github_pat_or_app_token
+REPO_OWNER=your-repo-owner
+REPO_NAME=your-repo-name
+WEBHOOK_SECRET=your-webhook-secret
+PORT=3000
