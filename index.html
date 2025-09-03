@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Automated GitHub Issue Labeller Bot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="https://github.githubassets.com/favicons/favicon.png" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      background: #f8f8f8;
+      color: #23272f;
+    }
+    nav {
+      background: #1a1e23;
+      padding: 0.7em 0.5em;
+      text-align: center;
+    }
+    nav span {
+      color: #e3eafc;
+      font-size: 1.08em;
+      letter-spacing: 0.05em;
+      margin: 0 1.2em;
+      font-weight: 500;
+    }
+    nav a {
+      color: #e3eafc;
+      text-decoration: none;
+      margin: 0 1.2em;
+      font-size: 1.08em;
+      letter-spacing: 0.05em;
+      padding-bottom: 0.1em;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-bottom 0.2s;
+    }
+    nav a:hover {
+      color: #4299e1;
+      border-bottom: 2px solid #4299e1;
+    }
+    header {
+      background: #262b32;
+      color: #fff;
+      padding: 2em 0 1em 0;
+      text-align: center;
+      margin-bottom: 2em;
+      box-shadow: 0 2px 11px rgba(0,0,0,0.13);
+    }
+    header h1 {
+      margin-top: 0;
+      font-size: 2.1em;
+      letter-spacing: 0.03em;
+    }
+    .github-btns {
+      margin: 1.3rem 0 0.7rem 0;
+      text-align: center;
+    }
+    .github-btns a {
+      display: inline-block;
+      margin: 0 0.6rem;
+      padding: 0.5rem 1.2rem;
+      background: #24292e;
+      color: #fff;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+    .github-btns a:hover {
+      background: #444950;
+    }
+    main {
+      max-width: 850px;
+      margin: 1.5em auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+      padding: 2em 2.5em 1.5em 2.5em;
+    }
+    section {
+      margin-bottom: 2.2em;
+    }
+    h2 {
+      margin-top: 1.5em;
+      margin-bottom: 0.7em;
+      color: #3b69b6;
+      font-weight: 500;
+    }
+    ul, ol {
+      margin-left: 1.7em;
+    }
+    code, pre {
+      background: #f3f3f3;
+      color: #396;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Mono', 'Consolas', monospace;
+    }
+    .button {
+      display: inline-block;
+      background: #4299e1;
+      color: #fff !important;
+      padding: 0.6em 1.5em;
+      border-radius: 5px;
+      margin: 0.8em 0 0.8em 0;
+      text-decoration: none;
+      font-size: 1.04em;
+      transition: background 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .button:hover {
+      background: #255e96;
+    }
+    .faq .faq-question {
+      width: 100%;
+      background: #e2e8f0;
+      border: none;
+      outline: none;
+      text-align: left;
+      padding: 0.8em 1em;
+      font-size: 1.05em;
+      color: #285185;
+      margin-top: 0.7em;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.1s;
+      display: block;
+    }
+    .faq .faq-question.active {
+      background: #c5e4fa;
+    }
+    .faq .faq-answer {
+      display: none;
+      background: #f8fafc;
+      border-left: 3px solid #4299e1;
+      margin: 0 0 0.7em 0;
+      padding: 0.8em 1em;
+      border-radius: 0 7px 7px 7px;
+    }
+    .result {
+      margin-top: 2em;
+      background: #e6fbe7;
+      border: 1px solid #a2e1a8;
+      border-radius: 6px;
+      padding: 1.2em 1.5em;
+      color: #1a491a;
+      font-size: 1.1em;
+      display: none;
+    }
+    form input[type="text"], form textarea {
+      width: 95%;
+      padding: 0.5em;
+      border: 1px solid #b4c8de;
+      border-radius: 4px;
+      margin-bottom: 1em;
+      font-size: 1em;
+    }
+    form button[type="submit"] {
+      background: #4299e1;
+      color: #fff;
+      border: none;
+      padding: 0.7em 2em;
+      border-radius: 5px;
+      font-size: 1.07em;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    form button[type="submit"]:hover {
+      background: #255e96;
+    }
+    .tab-container {
+      margin: 2em 0 1.5em 0;
+      display: flex;
+      gap: 0.3em;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: #e2e8f0;
+      color: #285185;
+      border: none;
+      border-radius: 5px 5px 0 0;
+      padding: 0.7em 1.7em;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .tab-btn.active {
+      background: #4299e1;
+      color: #fff;
+    }
+    .tab-panel {
+      display: none;
+      margin-bottom: 2em;
+    }
+    .tab-panel.active {
+      display: block;
+      animation: fade-in 0.4s;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    footer {
+      background: #23272f;
+      color: #b0b7c6;
+      text-align: center;
+      padding: 1.2em 0 1em 0;
+      margin-top: 2.5em;
+      font-size: 1em;
+    }
+    @media (max-width: 600px) {
+      main { padding: 1em 0.4em; }
+      header h1 { font-size: 1.2em; }
+      .tab-btn { font-size: 0.95em; padding: 0.7em 0.7em;}
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <span>Automated GitHub Issue Labeller Bot</span>
+    <a href="https://github.com/AbhyanandSharma2005/Automated-GitHub-Issue-Labeller-Bot" target="_blank">GitHub</a>
+    <a href="https://github.com/AbhyanandSharma2005/Automated-GitHub-Issue-Labeller-Bot/issues" target="_blank">Issues</a>
+  </nav>
+  <header>
+    <h1>Automated GitHub Issue Labeller Bot</h1>
+    <p>Auto-label your GitHub issues using a local classifier. Fast, free, and open source!</p>
+    <div class="github-btns">
+      <a href="https://github.com/AbhyanandSharma2005/Automated-GitHub-Issue-Labeller-Bot" target="_blank">⭐ View on GitHub</a>
+      <a href="https://github.com/AbhyanandSharma2005/Automated-GitHub-Issue-Labeller-Bot/issues" target="_blank">🐞 Report Issue</a>
+    </div>
+  </header>
+  <main>
+    <div class="tab-container">
+      <button class="tab-btn active" data-tab="home">Home</button>
+      <button class="tab-btn" data-tab="docs">Docs</button>
+      <button class="tab-btn" data-tab="demo">Demo</button>
+      <button class="tab-btn" data-tab="faq">FAQ</button>
+    </div>
+
+    <!-- Home Tab -->
+    <section class="tab-panel active" id="tab-home">
+      <h2>Welcome</h2>
+      <p>
+        This bot automatically labels new issues in your GitHub repository using a local ML classifier.<br>
+        <button class="button" onclick="activateTab('demo')">Try the Demo</button>
+      </p>
+      <h2>Features</h2>
+      <ul>
+        <li>⚡ Fast & free, open source</li>
+        <li>🔒 No data leaves your server</li>
+        <li>🧠 Customizable with your own label rules</li>
+        <li>🐳 Easy Docker/Render deployment</li>
+      </ul>
+    </section>
+
+    <!-- Docs Tab -->
+    <section class="tab-panel" id="tab-docs">
+      <h2>Quickstart</h2>
+      <ol>
+        <li>Clone the repo:<br>
+          <code>git clone https://github.com/AbhyanandSharma2005/Automated-GitHub-Issue-Labeller-Bot.git</code></li>
+        <li>Configure <code>.env</code> (see <code>environment.example</code>).</li>
+        <li>Install dependencies: <code>npm install</code></li>
+        <li>Run locally: <code>npm start</code></li>
+        <li>Or deploy with Docker: <code>docker compose up --build</code></li>
+        <li>Set up a GitHub webhook pointing to <code>/webhook</code> endpoint.</li>
+      </ol>
+      <h2>Extending</h2>
+      <ul>
+        <li>Add more labeled examples to <code>test-data/issues.json</code> for improved accuracy.</li>
+        <li>Replace the classifier with your own logic or connect to an LLM API.</li>
+        <li>Edit <code>src/labeler.js</code> for custom rules.</li>
+      </ul>
+      <h2>Deployment Platforms</h2>
+      <ul>
+        <li>Render (recommended for beginners)</li>
+        <li>Docker on any cloud/VPS</li>
+        <li>Self-hosted Node.js</li>
+      </ul>
+      <h2>Support</h2>
+      <p>For bug reports or feature requests, open an <a href="https://github.com/AbhyanandSharma2005/Automated-GitHub-Issue-Labeller-Bot/issues" target="_blank">issue on GitHub</a>.</p>
+    </section>
+
+    <!-- Demo Tab -->
+    <section class="tab-panel" id="tab-demo">
+      <h2>Try the Labeller Demo</h2>
+      <p>See how the classifier would label your issue!</p>
+      <form id="demo-form">
+        <label for="title">Issue Title:</label>
+        <input type="text" id="title" placeholder="e.g. Crash on login" required><br>
+        <label for="body">Description:</label>
+        <textarea id="body" rows="4" placeholder="Describe your issue..."></textarea><br>
+        <button type="submit">Suggest Labels</button>
+      </form>
+      <div id="result" class="result"></div>
+    </section>
+
+    <!-- FAQ Tab -->
+    <section class="tab-panel" id="tab-faq">
+      <h2>FAQ</h2>
+      <div class="faq">
+        <button class="faq-question">How does the bot classify issues?</button>
+        <div class="faq-answer"><p>It uses a TF-IDF + cosine similarity classifier trained on your labeled examples in JSON. You can expand the dataset for more accuracy.</p></div>
+        <button class="faq-question">Can I use this for private repos?</button>
+        <div class="faq-answer"><p>Yes! Just provide a personal access token with repo permissions.</p></div>
+        <button class="faq-question">Does it cost anything?</button>
+        <div class="faq-answer"><p>No! This is 100% open source and runs on your own infra or free Render plan.</p></div>
+        <button class="faq-question">How do I improve label accuracy?</button>
+        <div class="faq-answer"><p>Add more labeled examples to the <code>test-data/issues.json</code> file in your project.</p></div>
+      </div>
+    </section>
+  </main>
+  <footer>
+    &copy; 2025 <a href="https://github.com/AbhyanandSharma2005">Abhyanand Sharma</a>
+  </footer>
+  <script>
+    // --- Tab system ---
+    function activateTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === 'tab-' + tab);
+      });
+      window.scrollTo({top: 0});
+    }
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        activateTab(btn.dataset.tab);
+      });
+    });
+    // Allow activating Demo tab from Home button
+    window.activateTab = activateTab;
+
+    // --- FAQ Collapsible ---
+    document.addEventListener("DOMContentLoaded", function() {
+      var faqQuestions = document.querySelectorAll('.faq-question');
+      faqQuestions.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var answer = btn.nextElementSibling;
+          var isActive = btn.classList.contains('active');
+          faqQuestions.forEach(function(b) {
+            b.classList.remove('active');
+            if (b.nextElementSibling) b.nextElementSibling.style.display = "none";
+          });
+          if (!isActive) {
+            btn.classList.add('active');
+            answer.style.display = "block";
+          }
+        });
+      });
+    });
+
+    // --- Demo classifier logic ---
+    const sampleLabels = [
+      { keywords: ['bug', 'error', 'crash', 'fail', 'broken', 'hang', 'freeze'], label: 'bug' },
+      { keywords: ['feature', 'add', 'support', 'request', 'enhance', 'improve', 'export', 'import'], label: 'enhancement' },
+      { keywords: ['doc', 'readme', 'documentation', 'guide', 'contributing', 'typo'], label: 'documentation' },
+      { keywords: ['help', 'assist', 'support', 'question', 'how', 'what', 'why'], label: 'help wanted' },
+      { keywords: ['how', 'what', 'why', 'question', 'can i', 'is it'], label: 'question' }
+    ];
+
+    function suggestLabels(title, body) {
+      const text = (title + ' ' + body).toLowerCase();
+      let found = [];
+      sampleLabels.forEach(({keywords, label}) => {
+        if (keywords.some(k => text.includes(k))) found.push(label);
+      });
+      if (found.length === 0) found.push('unlabeled');
+      // Remove dups and return
+      return Array.from(new Set(found));
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      const form = document.getElementById('demo-form');
+      const res = document.getElementById('result');
+      if(form) {
+        form.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const title = document.getElementById('title').value;
+          const body = document.getElementById('body').value;
+          const labels = suggestLabels(title, body);
+          res.innerHTML = `<b>Suggested label(s):</b> <span>${labels.join(', ')}</span>`;
+          res.style.display = 'block';
+        });
+      }
+    });
+  </script>
+</body>
+</html>
